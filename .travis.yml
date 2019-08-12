@@ -1,19 +1,20 @@
 language: node_js
+node_js:
+    - '10'
 install:
-  - npm install
+    - npm install
 script:
-  - npm run lint
-  
+    - npm run lint
 after_success:
-  - npm run build 
+    - npm run build
 before_deploy:
-  - cd dist
+    - cd dist
 deploy:
-  provider: npm
-  tag: next
-  email: kirangplkrishnan@gmail.com
-  api_key:
-    secure: nnWYwwgAsD1mjBuX6aybzTKLZodqvnVOrpC5dKS7x4mtj+Ucf6O9La596GaMf+8fjj7GHyGDLOdv03+KOOkfCy3vkQ/MVGVQis8lp9Rrql7aVqDrqO+GZtS77DiCa85P7q/pmrStk5M5S4cCjFrtFYWDeErMPdvyntaEnM/8KimvIrHmoJs2Nh9pPzpP5ZbF4723j1oP80UJn6YOAjq2/Tf/u7Pn7qalWI/oJOvI+RmFVkAYjxEma4Q7Me5OxlrLg4f5sXcrroPFylK8oDl+/SeP9A0+xojCTbEGzIbaivAyDCjIq7LtVHUHq7+JowYc71ntCblqZMSTs0jPKtykCM2j8FXf0oYu5ZlJ0SWj8dGA1k7+i59JwvvpsDjFTWCAanNGEUQVOKkXv+cjRC9O8kEzUiRv116QKZa3VBEBg1aDZ8ue97LrpWRFd6OVEhCGzoQaF06fwV+8H5H0d8oXXpgHvhxfFZ8+yhxSn4tn7r3jlUXXTQbZsyoLbTL1x3l3jR/sapoXK+ogAKJEWYCXq2IgPMYgvm14+v1kbaMXgLVQqVayIBpvBRmg0Lt0BZz9FyWhTLYHwZ+KSukeo6u8DUO5MoixO/YG6b0lMDBCHEu5eSBDh0zamIzsv6/AFPwWOyZAFb1mWuCLHzdNGVv0LaKQijbluuaiRQpJ1K3mJa8=
+    provider: npm
+    tag: next
+    email: kirangplkrishnan@gmail.com
+    api_key:
+        secure: nnWYwwgAsD1mjBuX6aybzTKLZodqvnVOrpC5dKS7x4mtj+Ucf6O9La596GaMf+8fjj7GHyGDLOdv03+KOOkfCy3vkQ/MVGVQis8lp9Rrql7aVqDrqO+GZtS77DiCa85P7q/pmrStk5M5S4cCjFrtFYWDeErMPdvyntaEnM/8KimvIrHmoJs2Nh9pPzpP5ZbF4723j1oP80UJn6YOAjq2/Tf/u7Pn7qalWI/oJOvI+RmFVkAYjxEma4Q7Me5OxlrLg4f5sXcrroPFylK8oDl+/SeP9A0+xojCTbEGzIbaivAyDCjIq7LtVHUHq7+JowYc71ntCblqZMSTs0jPKtykCM2j8FXf0oYu5ZlJ0SWj8dGA1k7+i59JwvvpsDjFTWCAanNGEUQVOKkXv+cjRC9O8kEzUiRv116QKZa3VBEBg1aDZ8ue97LrpWRFd6OVEhCGzoQaF06fwV+8H5H0d8oXXpgHvhxfFZ8+yhxSn4tn7r3jlUXXTQbZsyoLbTL1x3l3jR/sapoXK+ogAKJEWYCXq2IgPMYgvm14+v1kbaMXgLVQqVayIBpvBRmg0Lt0BZz9FyWhTLYHwZ+KSukeo6u8DUO5MoixO/YG6b0lMDBCHEu5eSBDh0zamIzsv6/AFPwWOyZAFb1mWuCLHzdNGVv0LaKQijbluuaiRQpJ1K3mJa8=
 on:
-  tags: true
-   branch: master
+    tags: true
+    branch: master
