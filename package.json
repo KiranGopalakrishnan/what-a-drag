@@ -19,9 +19,6 @@
         "build:major": "npm version major",
         "postversion": "git push && git push --tags"
     },
-    "bundledDependencies": [
-        "react-window"
-    ],
     "author": "",
     "license": "ISC",
     "devDependencies": {
