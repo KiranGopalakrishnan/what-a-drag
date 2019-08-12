@@ -13,9 +13,9 @@
         "lint:fix": "eslint ./src --ext .ts,.tsx --fix  -c .eslintrc.js",
         "prettier": "prettier --config .prettierrc.js --write 'src/**/*.{ts,tsx}'",
         "prettier:check": "prettier --config .prettierrc.js --list-different 'src/**/*.{ts,tsx}'",
-        "publish:patch": "cd build && git tag $(npm version patch)",
-        "publish:minor": "cd build && git tag $(npm version minor)",
-        "publish:major": "cd build && git tag $(npm version major)",
+        "publish:patch": "./actions/version-patch.sh",
+        "publish:minor": "./actions/version-minor.sh",
+        "publish:major": "./actions/version-major.sh",
         "postversion": "git push && git push --tags"
     },
     "author": "Kiran Gopalakrishnan",
