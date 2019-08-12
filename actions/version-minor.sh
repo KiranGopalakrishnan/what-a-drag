@@ -5,3 +5,4 @@ git tag -a "$tag" -m "$tag"
 cd ..
 git add .
 git commit -m "$tag"
+git push && git push --tags
