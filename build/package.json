@@ -1,10 +1,10 @@
 {
     "name": "what-a-drag",
-    "version": "1.1.6",
-    "description": "",
+    "version": "1.1.12",
+    "description": "A Drag and drop tree library designed with customization and usability in mind",
     "main": "./dist/index.js",
     "author": "Kiran Gopalakrishnan",
-    "license": "ISC",
+    "license": "MIT",
     "peerDependencies": {
         "react": "^16.9.0",
         "react-dom": "^16.9.0"

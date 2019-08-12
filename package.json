@@ -13,13 +13,13 @@
         "lint:fix": "eslint ./src --ext .ts,.tsx --fix  -c .eslintrc.js",
         "prettier": "prettier --config .prettierrc.js --write 'src/**/*.{ts,tsx}'",
         "prettier:check": "prettier --config .prettierrc.js --list-different 'src/**/*.{ts,tsx}'",
-        "publish:patch": "cd build/ && npm version patch",
-        "publish:minor": "cd build/ && npm version minor",
-        "publish:major": "cd build/ && npm version major",
+        "publish:patch": "cd build && npm run publish:patch",
+        "publish:minor": "cd build && npm run publish:minor",
+        "publish:major": "cd build && npm run publish:major",
         "postversion": "git push && git push --tags"
     },
-    "author": "",
-    "license": "ISC",
+    "author": "Kiran Gopalakrishnan",
+    "license": "MIT",
     "devDependencies": {
         "@typescript-eslint/eslint-plugin": "^1.13.0",
         "@typescript-eslint/parser": "^1.13.0",
