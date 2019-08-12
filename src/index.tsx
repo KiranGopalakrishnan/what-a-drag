@@ -87,7 +87,7 @@ export class Draggable extends React.Component<Props, State> {
         };
     }
 
-    onDrop = (id, event) => {
+    onDrop = id => {
         const { currentlyDragging, tree } = this.state;
         const { onDragEnd } = this.props;
         const source = getSourcePosition(tree, currentlyDragging);
@@ -98,7 +98,7 @@ export class Draggable extends React.Component<Props, State> {
         this.setState({ currentlyDragging: null, currentlyDraggingOver: null, tree: newTree });
     };
 
-    onDrag = (id, event) => {
+    onDrag = id => {
         //just so that the state is set a millisecond after since settimeout sends the setstate through the js event loop
         setTimeout(() => {
             this.setState({ currentlyDragging: id });
@@ -146,8 +146,8 @@ export class Draggable extends React.Component<Props, State> {
                             key={item.id}
                             draggable
                             onDragOver={event => this.onDragOver(item.id, event)}
-                            onDrop={event => this.onDrop(item.id, event)}
-                            onDragStart={event => this.onDrag(item.id, event)}
+                            onDrop={() => this.onDrop(item.id)}
+                            onDragStart={() => this.onDrag(item.id)}
                             style={{
                                 position: 'relative',
                                 display: isVisible ? 'block' : 'none',
