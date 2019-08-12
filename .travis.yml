@@ -8,7 +8,7 @@ script:
 after_success:
     - npm run build
 before_deploy:
-    - cd dist
+    - cd build
 deploy:
     provider: npm
     tag: next
