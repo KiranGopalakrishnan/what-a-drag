@@ -13,9 +13,9 @@
         "lint:fix": "eslint ./src --ext .ts,.tsx --fix  -c .eslintrc.js",
         "prettier": "prettier --config .prettierrc.js --write 'src/**/*.{ts,tsx}'",
         "prettier:check": "prettier --config .prettierrc.js --list-different 'src/**/*.{ts,tsx}'",
-        "build:patch": " cd build && npm version patch",
-        "build:minor": "cd build && npm version minor",
-        "build:major": "cd build && npm version major",
+        "publish:patch": "npm version patch && cd build && npm version patch",
+        "publish:minor": "npm version minor && cd build && npm version minor",
+        "publish:major": "npm version major && cd build && npm version major",
         "postversion": "git push && git push --tags"
     },
     "author": "",
