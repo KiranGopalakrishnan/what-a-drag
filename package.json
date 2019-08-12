@@ -1,5 +1,5 @@
 {
-    "name": "Draggable",
+    "name": "draggable",
     "version": "1.0.0",
     "description": "",
     "main": "src/index.js",
@@ -11,7 +11,13 @@
         "dev": "tsc --w",
         "lint": "eslint ./src --ext .ts,.tsx -c .eslintrc.js --max-warnings=0",
         "lint:fix": "eslint ./src --ext .ts,.tsx --fix  -c .eslintrc.js",
-        "prettier": "prettier --config .prettierrc.js --write 'src/**/*.{ts,tsx}'"
+        "prettier": "prettier --config .prettierrc.js --write 'src/**/*.{ts,tsx}'",
+        "prettier:check": "prettier --config .prettierrc.js --list-different 'src/**/*.{ts,tsx}'",
+        "version": "npm run build && git add .",
+        "build:patch": "npm version patch",
+        "build:minor": "npm version minor",
+        "build:major": "npm version major",
+        "postversion": "git push && git push --tags"
     },
     "bundledDependencies": [
         "react-window"
