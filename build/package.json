@@ -1,13 +1,13 @@
 {
-    "name": "Draggable",
-    "version": "1.0.0",
+    "name": "what-a-drag",
+    "version": "1.0.1",
     "description": "",
     "main": "./dist/index.js",
-    "author": "",
+    "author": "Kiran Gopalakrishnan",
     "license": "ISC",
     "peerDependencies": {
-        "react": "16.9.0",
-        "react-dom": "16.9.0"
+        "react": "^16.9.0",
+        "react-dom": "^16.9.0"
     },
     "bundledDependencies": [
         "react-window"
