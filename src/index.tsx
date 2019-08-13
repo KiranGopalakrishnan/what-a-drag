@@ -1,5 +1,5 @@
 import * as React from 'react';
-
+import { FixedSizeList as List } from 'react-window';
 import {
     moveItemOnTree,
     isParentExpanded,
@@ -96,6 +96,7 @@ export class Draggable extends React.Component<Props, State> {
         const newTree = moveItemOnTree(tree, currentlyDragging, id);
         onDragEnd(source, destination);
         this.setState({ currentlyDragging: null, currentlyDraggingOver: null, tree: newTree });
+        console.log('Item');
     };
 
     onDrag = id => {
@@ -126,40 +127,50 @@ export class Draggable extends React.Component<Props, State> {
         return copyOfTree;
     };
 
-    render() {
+    row = ({ index, style }) => {
         const { tree, currentlyDragging, currentlyDraggingOver } = this.state;
         const { renderItem, renderPlaceholder } = this.props;
         const { onCollapse, onExpand } = this;
 
         const minimalFlatTree = flattenToMinimalTree(tree);
+        const itemId = minimalFlatTree[index];
 
+        const item = tree['items'][itemId];
+        const isDragging = currentlyDragging === itemId;
+        const isDraggingOver = currentlyDraggingOver === itemId;
+        const isVisible = isParentExpanded(tree, itemId);
+        const isChild = isChildItem(tree, itemId);
+        console.log(style);
         return (
-            <div>
-                {minimalFlatTree.map((itemId: ItemId) => {
-                    const item = tree['items'][itemId];
-                    const isDragging = currentlyDragging === itemId;
-                    const isDraggingOver = currentlyDraggingOver === itemId;
-                    const isVisible = isParentExpanded(tree, itemId);
-                    const isChild = isChildItem(tree, itemId);
-                    return (
-                        <div
-                            key={item.id}
-                            draggable
-                            onDragOver={event => this.onDragOver(item.id, event)}
-                            onDrop={() => this.onDrop(item.id)}
-                            onDragStart={() => this.onDrag(item.id)}
-                            style={{
-                                position: 'relative',
-                                display: isVisible ? 'block' : 'none',
-                                marginLeft: isChild ? '35px' : '0',
-                            }}
-                        >
-                            {renderItem({ item, onCollapse, onExpand })}
-                            {isDraggingOver ? renderPlaceholder({ item, isDraggingOver, isDragging }) : null}
-                        </div>
-                    );
-                })}
+            <div
+                key={item.id}
+                draggable
+                onDragOver={event => this.onDragOver(item.id, event)}
+                onDrop={() => this.onDrop(item.id)}
+                onDragStart={() => this.onDrag(item.id)}
+                style={{ ...style, ...{ left: isChild ? '35px' : '0', display: isVisible ? 'block' : 'none' } }}
+            >
+                {renderItem({ item, onCollapse, onExpand })}
+                {isDraggingOver ? renderPlaceholder({ item, isDraggingOver, isDragging }) : null}
             </div>
+        );
+    };
+
+    render() {
+        const { tree, currentlyDragging, currentlyDraggingOver } = this.state;
+        const minimalFlatTree = flattenToMinimalTree(tree);
+        return (
+            <List
+                tree={tree}
+                currentlyDragging={currentlyDragging}
+                currentlyDraggingOver={currentlyDraggingOver}
+                height={250}
+                itemCount={minimalFlatTree.length}
+                itemSize={32}
+                width={'100%'}
+            >
+                {this.row}
+            </List>
         );
     }
 }
