@@ -50,15 +50,17 @@ interface Props {
     onDragEnd: Function;
     renderPlaceholder: Function;
     onCollapse: Function;
+    onExpand: Function;
     width: number | string;
     height: number;
     itemHeight: number;
 }
 
-//Extract id's for root items and their children while keeping the order
+//Extract id's for root items and expanded child items while keeping the order
 const flattenToMinimalTree = (tree: Tree) => {
     const flatTreeWithNullValues = tree.items[tree.rootId].children.map((item: ChildItem) => {
-        const childrenArray = tree['items'][item].hasChildren ? tree.items[item].children : null;
+        const childrenArray =
+            tree['items'][item].hasChildren && tree['items'][item].isExpanded ? tree.items[item].children : null;
         return [item].concat(childrenArray);
     });
 
@@ -103,7 +105,6 @@ export class DraggableList extends React.Component<Props, State> {
         const newTree = moveItemOnTree(tree, currentlyDragging, id);
         onDragEnd(source, destination);
         this.setState({ currentlyDragging: null, currentlyDraggingOver: null, tree: newTree });
-        console.log('Item');
     };
 
     onDrag = id => {
@@ -131,6 +132,7 @@ export class DraggableList extends React.Component<Props, State> {
         const { tree } = this.state;
         let copyOfTree = (Object as any).assign({}, tree);
         copyOfTree.items[itemId].isExpanded = true;
+        this.props.onExpand(itemId);
         return copyOfTree;
     };
 
@@ -147,7 +149,6 @@ export class DraggableList extends React.Component<Props, State> {
         const isDraggingOver = currentlyDraggingOver === itemId;
         const isVisible = isParentExpanded(tree, itemId);
         const isChild = isChildItem(tree, itemId);
-        console.log(style);
         return (
             <div
                 key={item.id}
