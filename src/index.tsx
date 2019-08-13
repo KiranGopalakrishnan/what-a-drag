@@ -1,4 +1,5 @@
 import * as React from 'react';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { FixedSizeList as List } from 'react-window';
 import {
     moveItemOnTree,
@@ -164,7 +165,7 @@ export class Draggable extends React.Component<Props, State> {
                 tree={tree}
                 currentlyDragging={currentlyDragging}
                 currentlyDraggingOver={currentlyDraggingOver}
-                height={250}
+                height={150}
                 itemCount={minimalFlatTree.length}
                 itemSize={32}
                 width={'100%'}
