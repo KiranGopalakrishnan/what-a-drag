@@ -157,7 +157,11 @@ export class DraggableList extends React.Component<Props, State> {
                 onDragStart={() => this.onDrag(item.id)}
                 style={{
                     ...style,
-                    ...{ borderLeft: isChild ? 'solid 35px transparent' : '0', display: isVisible ? 'block' : 'none' },
+                    ...{
+                        borderLeft: isChild ? 'solid 35px transparent' : '0',
+                        boxSizing: 'border-box',
+                        display: isVisible ? 'block' : 'none',
+                    },
                 }}
             >
                 {renderItem({ item, onCollapse, onExpand })}
