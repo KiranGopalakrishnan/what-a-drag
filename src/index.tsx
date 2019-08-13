@@ -1,6 +1,6 @@
 import * as React from 'react';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { FixedSizeList as List } from 'react-window';
+import { FixedSizeList as List, areEqual } from 'react-window';
 import {
     moveItemOnTree,
     isParentExpanded,
@@ -96,7 +96,9 @@ export class DraggableList extends React.Component<Props, State> {
         };
     }
 
-    onDrop = id => {
+    onDrop = (id, event) => {
+        event.preventDefault();
+        event.stopPropagation();
         const { currentlyDragging, tree } = this.state;
         const { onDragEnd } = this.props;
         const source = getSourcePosition(tree, currentlyDragging);
@@ -136,7 +138,8 @@ export class DraggableList extends React.Component<Props, State> {
         return copyOfTree;
     };
 
-    row = ({ index, style }) => {
+    row = props => {
+        const { index, style } = props;
         const { tree, currentlyDragging, currentlyDraggingOver } = this.state;
         const { renderItem, renderPlaceholder } = this.props;
         const { onCollapse, onExpand } = this;
@@ -154,8 +157,11 @@ export class DraggableList extends React.Component<Props, State> {
                 key={item.id}
                 draggable
                 onDragOver={event => this.onDragOver(item.id, event)}
-                onDrop={() => this.onDrop(item.id)}
-                onDragStart={() => this.onDrag(item.id)}
+                onDrop={event => this.onDrop(item.id, event)}
+                onDragStart={event => {
+                    event.dataTransfer.setData('text', item.id);
+                    this.onDrag(item.id);
+                }}
                 style={{
                     ...style,
                     ...{
