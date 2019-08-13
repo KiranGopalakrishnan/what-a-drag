@@ -50,6 +50,9 @@ interface Props {
     onDragEnd: Function;
     renderPlaceholder: Function;
     onCollapse: Function;
+    width: number | string;
+    height: number;
+    itemHeight: number;
 }
 
 //Extract id's for root items and their children while keeping the order
@@ -62,7 +65,7 @@ const flattenToMinimalTree = (tree: Tree) => {
     return [].concat.apply([], flatTreeWithNullValues).filter(Boolean);
 };
 
-export class Draggable extends React.Component<Props, State> {
+export class DraggableList extends React.Component<Props, State> {
     state: State;
     constructor(props) {
         super(props);
@@ -76,6 +79,9 @@ export class Draggable extends React.Component<Props, State> {
     public static defaultProps = {
         renderItem: (): void => {},
         tree: {},
+        height: 400,
+        width: '100%',
+        itemHeight: 32,
     };
 
     static getDerivedStateFromProps(props: Props, state: State) {
@@ -149,7 +155,10 @@ export class Draggable extends React.Component<Props, State> {
                 onDragOver={event => this.onDragOver(item.id, event)}
                 onDrop={() => this.onDrop(item.id)}
                 onDragStart={() => this.onDrag(item.id)}
-                style={{ ...style, ...{ left: isChild ? '35px' : '0', display: isVisible ? 'block' : 'none' } }}
+                style={{
+                    ...style,
+                    ...{ borderLeft: isChild ? 'solid 35px transparent' : '0', display: isVisible ? 'block' : 'none' },
+                }}
             >
                 {renderItem({ item, onCollapse, onExpand })}
                 {isDraggingOver ? renderPlaceholder({ item, isDraggingOver, isDragging }) : null}
@@ -159,16 +168,17 @@ export class Draggable extends React.Component<Props, State> {
 
     render() {
         const { tree, currentlyDragging, currentlyDraggingOver } = this.state;
+        const { height, itemHeight, width } = this.props;
         const minimalFlatTree = flattenToMinimalTree(tree);
         return (
             <List
                 tree={tree}
                 currentlyDragging={currentlyDragging}
                 currentlyDraggingOver={currentlyDraggingOver}
-                height={150}
+                height={height}
                 itemCount={minimalFlatTree.length}
-                itemSize={32}
-                width={'100%'}
+                itemSize={itemHeight}
+                width={width}
             >
                 {this.row}
             </List>

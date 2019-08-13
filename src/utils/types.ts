@@ -20,15 +20,6 @@ export interface TreeData {
     items: { [key: string]: TreeItem };
 }
 
-export type FlattenedTree = FlattenedItem[];
-
-export type Path = number[];
-
-export interface FlattenedItem {
-    item: TreeItem;
-    path: Path;
-}
-
 export interface TreeSourcePosition {
     parentId: ItemId;
     index: number;
