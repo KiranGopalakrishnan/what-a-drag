@@ -122,6 +122,11 @@ export class DraggableList extends React.Component<Props, State> {
         if (currentlyDraggingOver !== id) this.setState({ currentlyDraggingOver: id });
     };
 
+    onDragEnd = event => {
+        event.preventDefault();
+        this.setState({ currentlyDragging: null, currentlyDraggingOver: null });
+    };
+
     onCollapse = itemId => {
         const { tree } = this.state;
         let copyOfTree = (Object as any).assign({}, tree);
@@ -155,6 +160,7 @@ export class DraggableList extends React.Component<Props, State> {
         return (
             <div
                 key={item.id}
+                className={'draggableItem'}
                 draggable
                 onDragOver={event => this.onDragOver(item.id, event)}
                 onDrop={event => this.onDrop(item.id, event)}
@@ -162,6 +168,7 @@ export class DraggableList extends React.Component<Props, State> {
                     event.dataTransfer.setData('text', item.id);
                     this.onDrag(item.id);
                 }}
+                onDragEnd={this.onDragEnd}
                 style={{
                     ...style,
                     ...{
