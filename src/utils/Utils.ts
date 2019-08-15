@@ -1,4 +1,4 @@
-import { TreeData, ItemId, TreeItem, TreeSourcePosition, TreeDestinationPosition } from './types';
+import { TreeData, ItemId, TreeItem, TreeSourcePosition, TreeDestinationPosition } from '../types/types';
 
 /*
   Changes the tree data structure with minimal reference changes.
@@ -83,9 +83,21 @@ export const getSourcePosition = (tree, itemId) => {
     };
 };
 
+//TODO: Refactor to support nested groups
+export const hasChildren = (tree: TreeData, itemId: ItemId) => {
+    return tree.items[itemId].hasChildren;
+};
+
 export const getDestinationPosition = (tree, destinationId) => {
     const parentId = getParentId(tree, destinationId);
     const index = getIndexOfItem(tree, parentId, destinationId);
+    return {
+        parentId,
+        index,
+    };
+};
+
+export const buildCustomDestinationPosition = (parentId: ItemId, index: number) => {
     return {
         parentId,
         index,

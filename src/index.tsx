@@ -1,22 +1,17 @@
 import * as React from 'react';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { FixedSizeList as List, areEqual } from 'react-window';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { DraggableItem } from './components/DraggableItem';
 import {
     moveItemOnTree,
     isParentExpanded,
     isChildItem,
     getSourcePosition,
     getDestinationPosition,
+    hasChildren,
+    buildCustomDestinationPosition,
 } from './utils/Utils';
-
-interface DraggableItemProps {
-    key: string;
-    draggable: boolean;
-    isVisible: boolean;
-    onDragOver: React.DragEvent<HTMLDivElement>;
-    onDrop: React.DragEvent<HTMLDivElement>;
-    onDragStart: React.DragEvent<HTMLDivElement>;
-}
 
 type ChildItem = string;
 
@@ -99,17 +94,21 @@ export class DraggableList extends React.Component<Props, State> {
     onDrop = (id, event) => {
         event.preventDefault();
         event.stopPropagation();
+
         const { currentlyDragging, tree } = this.state;
         const { onDragEnd } = this.props;
         const source = getSourcePosition(tree, currentlyDragging);
-        const destination = getDestinationPosition(tree, id);
-        moveItemOnTree(tree, currentlyDragging, id);
+        //If the item is a group item move the dropped items inside the group and inoto the first position
+        const destination = hasChildren(tree, id)
+            ? buildCustomDestinationPosition(id, 0)
+            : getDestinationPosition(tree, id);
+        moveItemOnTree(tree, source, destination);
         const newTree = moveItemOnTree(tree, currentlyDragging, id);
         onDragEnd(source, destination);
         this.setState({ currentlyDragging: null, currentlyDraggingOver: null, tree: newTree });
     };
 
-    onDrag = id => {
+    onDragStart = id => {
         //just so that the state is set a millisecond after since settimeout sends the setstate through the js event loop
         setTimeout(() => {
             this.setState({ currentlyDragging: id });
@@ -153,34 +152,25 @@ export class DraggableList extends React.Component<Props, State> {
         const itemId = minimalFlatTree[index];
 
         const item = tree['items'][itemId];
-        const isDragging = currentlyDragging === itemId;
-        const isDraggingOver = currentlyDraggingOver === itemId;
         const isVisible = isParentExpanded(tree, itemId);
         const isChild = isChildItem(tree, itemId);
         return (
-            <div
-                key={item.id}
-                className={'draggableItem'}
-                draggable
-                onDragOver={event => this.onDragOver(item.id, event)}
-                onDrop={event => this.onDrop(item.id, event)}
-                onDragStart={event => {
-                    event.dataTransfer.setData('text', item.id);
-                    this.onDrag(item.id);
-                }}
+            <DraggableItem
+                style={style}
+                currentlyDragging={currentlyDragging}
+                currentlyDraggingOver={currentlyDraggingOver}
+                item={item}
+                isChild={isChild}
+                isVisible={isVisible}
+                renderItem={renderItem}
+                renderPlaceholder={renderPlaceholder}
+                onCollapse={onCollapse}
+                onExpand={onExpand}
+                onDragStart={this.onDragStart}
+                onDragOver={this.onDragOver}
+                onDrop={this.onDrop}
                 onDragEnd={this.onDragEnd}
-                style={{
-                    ...style,
-                    ...{
-                        borderLeft: isChild ? 'solid 35px transparent' : '0',
-                        boxSizing: 'border-box',
-                        display: isVisible ? 'block' : 'none',
-                    },
-                }}
-            >
-                {renderItem({ item, onCollapse, onExpand })}
-                {isDraggingOver ? renderPlaceholder({ item, isDraggingOver, isDragging }) : null}
-            </div>
+            />
         );
     };
 
