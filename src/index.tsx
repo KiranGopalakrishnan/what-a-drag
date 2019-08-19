@@ -1,4 +1,5 @@
 import * as React from 'react';
+import * as ReactDOM from 'react-dom';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { FixedSizeList as List, areEqual } from 'react-window';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -9,69 +10,50 @@ import {
     isChildItem,
     getSourcePosition,
     getDestinationPosition,
+    flattenToMinimalTree,
     addFalseChildren,
     isFalseItem,
     buildCustomDestinationPosition,
     hasChildren,
+    getParentId,
+    getItemById,
+    stripOutFalseIdChars,
 } from './utils/Utils';
 
-type ChildItem = string;
-
-type ItemId = string;
-
-interface TreeItem {
-    id: string;
-    isExpanded: boolean;
-    hasChildren: boolean;
-    data: {
-        id: string;
-        [key: string]: any;
-    };
-    children: ChildItem[];
-}
-
-interface Tree {
-    rootId: string;
-    items: { [key: string]: TreeItem };
-}
+import { TreeData, TreeItem, ItemId } from './types/types';
 
 interface State {
-    currentlyDragging: string;
-    currentlyDraggingOver: string;
-    tree: Tree;
+    currentlyDragging: ItemId[];
+    currentlyDraggingOver: ItemId;
+    tree: TreeData;
+    snapshot: HTMLDivElement;
 }
 
 interface Props {
-    renderItem: Function;
     tree: TreeItem[];
     onDragEnd: Function;
+    renderItem: Function;
     renderPlaceholder: Function;
+    renderSnapshot: Function;
+    beforeDrop: Function;
     onCollapse: Function;
     onExpand: Function;
     width: number | string;
     height: number;
     itemHeight: number;
+    selectedItems: ItemId[];
 }
-
-//Extract id's for root items and expanded child items while keeping the order
-const flattenToMinimalTree = (tree: Tree) => {
-    const flatTreeWithNullValues = tree.items[tree.rootId].children.map((item: ChildItem) => {
-        const childrenArray =
-            tree['items'][item].hasChildren && tree['items'][item].isExpanded ? tree.items[item].children : null;
-        return [item].concat(childrenArray);
-    });
-
-    return [].concat.apply([], flatTreeWithNullValues).filter(Boolean);
-};
 
 export class DraggableList extends React.Component<Props, State> {
     state: State;
+    nodeRefs = new Map();
     constructor(props) {
         super(props);
         this.state = {
-            currentlyDragging: null,
+            currentlyDragging: [],
             currentlyDraggingOver: null,
             tree: props.tree,
+            snapshot: null,
         };
     }
 
@@ -81,56 +63,109 @@ export class DraggableList extends React.Component<Props, State> {
         height: 400,
         width: '100%',
         itemHeight: 32,
+        beforeDrop: () => true,
+        renderSnapshot: ({ snapshot }) => snapshot,
     };
 
     static getDerivedStateFromProps(props: Props, state: State) {
         const { tree } = props;
-        const { currentlyDragging, currentlyDraggingOver } = state;
+        const { currentlyDragging, currentlyDraggingOver, snapshot } = state;
         return {
             tree,
             currentlyDragging,
             currentlyDraggingOver,
+            snapshot,
         };
     }
-
+    setRef = (id, element) => {
+        this.nodeRefs.set(id, element);
+    };
     onDrop = (id, event) => {
         event.preventDefault();
-        event.stopPropagation();
 
-        const { currentlyDragging, tree } = this.state;
-        const { onDragEnd } = this.props;
-        const source = getSourcePosition(tree, currentlyDragging);
-        //If the item is a group item move the dropped items inside the group and inoto the first position
-        const destination = isFalseItem(id)
-            ? buildCustomDestinationPosition(id.replace('FALSEITEM_', ''), 0)
-            : getDestinationPosition(tree, id);
+        const { currentlyDragging, tree, snapshot } = this.state;
+        const { onDragEnd, beforeDrop } = this.props;
 
-        const newTree = moveItemOnTree(tree, source, destination);
-        onDragEnd(source, destination);
-        this.setState({ currentlyDragging: null, currentlyDraggingOver: null, tree: newTree });
+        if (beforeDrop({ items: currentlyDragging, dropId: stripOutFalseIdChars(id) })) {
+            let newTree = tree;
+            let sourceArray = [];
+            const destination = isFalseItem(id)
+                ? buildCustomDestinationPosition(id.replace('FALSEITEM_', ''), 0)
+                : getDestinationPosition(tree, id);
+
+            currentlyDragging
+                .slice(0)
+                .reverse()
+                .map(CurrentlyDraggingitem => {
+                    const source = getSourcePosition(newTree, CurrentlyDraggingitem);
+                    sourceArray.push(source);
+                    newTree = moveItemOnTree(newTree, source, destination);
+                });
+            if (snapshot) document.body.removeChild(this.state.snapshot);
+            onDragEnd(sourceArray, destination, newTree);
+
+            this.setState({ currentlyDragging: [], currentlyDraggingOver: null, tree: newTree, snapshot: null });
+        } else {
+            this.setState({ currentlyDragging: [], currentlyDraggingOver: null, snapshot: null });
+        }
     };
 
-    onDragStart = id => {
-        //just so that the state is set a millisecond after since settimeout sends the setstate through the js event loop
+    onDragStart = (id, event) => {
+        const { renderSnapshot, selectedItems } = this.props;
+
+        const selectedDraggables = selectedItems.length === 0 ? [id] : selectedItems;
+
+        const dragCount = selectedDraggables.length;
+        //Get the element being dragged on the dom
+        const snapshot = this.nodeRefs.get(id);
+
+        const relativeMousePositionX = event.nativeEvent.layerX || 0;
+
+        const relativeMousePositionY = event.nativeEvent.layerY || 0;
+        const snapshotWrapper = document.createElement('div');
+        let customSnapshot = renderSnapshot({ id, ref: snapshot, dragCount });
+
+        if (customSnapshot instanceof HTMLElement) {
+            customSnapshot = customSnapshot.cloneNode(true);
+            customSnapshot.style.top = '0';
+            customSnapshot.style.left = '0';
+            snapshotWrapper.appendChild(customSnapshot);
+        } else {
+            ReactDOM.render(customSnapshot, snapshotWrapper);
+        }
+        snapshotWrapper.style.position = 'absolute';
+        snapshotWrapper.style.top = '-1000px';
+        snapshotWrapper.style.display = 'block';
+        document.body.appendChild(snapshotWrapper);
+        this.setState({ snapshot: snapshotWrapper });
+        //set a custom drag image
+        event.dataTransfer.setDragImage(snapshotWrapper, relativeMousePositionX, relativeMousePositionY);
+        //just so that the state is set a millisecond after since setTimeout sends the setstate through the js event loop
         setTimeout(() => {
-            this.setState({ currentlyDragging: id });
+            this.setState({ currentlyDragging: selectedDraggables });
         }, 0);
     };
 
     onDragOver = (id, event) => {
         event.preventDefault();
-        const { currentlyDraggingOver, tree } = this.state;
-        if (currentlyDraggingOver !== id) {
-            if (!isFalseItem(id) && hasChildren(tree, id)) {
-                this.onExpand(id);
-            }
-            this.setState({ currentlyDraggingOver: id });
+        const { currentlyDraggingOver, tree, currentlyDragging } = this.state;
+        if (
+            !isFalseItem(id) &&
+            hasChildren(tree, id) &&
+            currentlyDraggingOver !== id &&
+            !currentlyDragging.includes(id)
+        ) {
+            this.onExpand(id);
         }
+        if (currentlyDraggingOver !== id) this.setState({ currentlyDraggingOver: id });
     };
 
     onDragEnd = event => {
         event.preventDefault();
-        this.setState({ currentlyDragging: null, currentlyDraggingOver: null });
+        event.stopPropagation();
+        const { snapshot } = this.state;
+        if (snapshot) document.body.removeChild(this.state.snapshot);
+        this.setState({ currentlyDragging: [], currentlyDraggingOver: null, snapshot: null });
     };
 
     onCollapse = itemId => {
@@ -171,8 +206,10 @@ export class DraggableList extends React.Component<Props, State> {
             : tree['items'][itemId];
         const isVisible = isFalseChilditem ? false : isParentExpanded(tree, itemId);
         const isChild = isFalseChilditem ? true : isChildItem(tree, itemId);
-        const isDragging = currentlyDragging === itemId;
+        const isDragging = currentlyDragging.includes(itemId);
         const isDraggingOver = currentlyDraggingOver === itemId;
+        const parentId = isFalseChilditem ? getParentId(tree, stripOutFalseIdChars(itemId)) : getParentId(tree, itemId);
+        const parentRef = this.nodeRefs.get(parentId) || null;
 
         return (
             <DraggableItem
@@ -181,8 +218,11 @@ export class DraggableList extends React.Component<Props, State> {
                 isDragging={isDragging}
                 isDraggingOver={isDraggingOver}
                 item={item}
+                setRef={this.setRef}
                 isChild={isChild}
                 isVisible={isVisible}
+                parentId={parentId}
+                parentRef={parentRef}
                 renderItem={renderItem}
                 renderPlaceholder={renderPlaceholder}
                 onCollapse={onCollapse}
@@ -215,4 +255,4 @@ export class DraggableList extends React.Component<Props, State> {
         );
     }
 }
-export { moveItemOnTree };
+export { moveItemOnTree, getItemById, hasChildren };

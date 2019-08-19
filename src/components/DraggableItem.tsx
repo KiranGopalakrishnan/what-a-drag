@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { TreeItem } from '../types/types';
+import { TreeItem, ItemId } from '../types/types';
 
 interface DraggableitemProps {
     style: Record<string, any>;
@@ -16,7 +16,10 @@ interface DraggableitemProps {
     onDragOver: Function;
     onDrop: Function;
     onDragEnd: Function;
+    setRef: Function;
     isFalseItem: boolean;
+    parentId: ItemId;
+    parentRef: HTMLElement;
 }
 
 export const DraggableItem: React.FC<DraggableitemProps> = props => {
@@ -34,13 +37,17 @@ export const DraggableItem: React.FC<DraggableitemProps> = props => {
         onDragOver,
         onDrop,
         onDragEnd,
+        setRef,
         isFalseItem,
+        parentId,
+        parentRef,
     } = props;
     return (
         <div
             key={item.id}
             className={'draggableItem'}
             draggable
+            ref={element => setRef(item.id, element)}
             onDragOver={event => onDragOver(item.id, event)}
             onDrop={event => onDrop(item.id, event)}
             onDragStart={event => {
@@ -58,7 +65,9 @@ export const DraggableItem: React.FC<DraggableitemProps> = props => {
             }}
         >
             {renderItem({ item, onCollapse, onExpand, isFalseItem })}
-            {isDraggingOver ? renderPlaceholder({ item, isDraggingOver, isDragging, isFalseItem }) : null}
+            {isDraggingOver
+                ? renderPlaceholder({ item, isDraggingOver, isDragging, isFalseItem, parentId, parentRef })
+                : null}
         </div>
     );
 };
