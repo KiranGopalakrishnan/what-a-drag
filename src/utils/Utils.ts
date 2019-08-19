@@ -1,4 +1,4 @@
-import { TreeData, ItemId, TreeItem, TreeSourcePosition, TreeDestinationPosition } from '../types/types';
+import { TreeData, ItemId, TreeItem, ChildItem, TreeSourcePosition, TreeDestinationPosition } from '../types/types';
 
 /*
   Changes the tree data structure with minimal reference changes.
@@ -6,17 +6,12 @@ import { TreeData, ItemId, TreeItem, TreeSourcePosition, TreeDestinationPosition
 export const mutateTree = (tree: TreeData, itemId: ItemId, mutation: any): TreeData => {
     const itemToChange = tree.items[itemId];
     if (!itemToChange) {
-        // Item not found
         return tree;
     }
-    // Returning a clone of the tree structure and overwriting the field coming in mutation
     return {
-        // rootId should not change
         rootId: tree.rootId,
         items: {
-            // copy all old items
             ...tree.items,
-            // overwriting only the item being changed
             [itemId]: {
                 ...itemToChange,
                 ...mutation,
@@ -53,6 +48,10 @@ const addItemToTree = (tree: TreeData, position: TreeDestinationPosition, item: 
     });
 };
 
+export const getItemById = (tree: TreeData, itemId: ItemId) => {
+    return tree.items[itemId] || undefined;
+};
+
 export const getParentId = (tree, itemId) => {
     const items = tree.items;
     const parentItem = Object.keys(items).filter((key: string) => {
@@ -68,6 +67,10 @@ export const isParentExpanded = (tree, itemId) => {
 
 export const getIndexOfItem = (tree, parentId, itemId) => {
     return tree.items[parentId].children.findIndex(childItem => childItem === itemId);
+};
+
+export const isSelected = (tree: TreeData, itemId: ItemId) => {
+    getItemById(tree, itemId).isSelected || undefined;
 };
 
 export const isChildItem = (tree, itemId) => {
@@ -109,4 +112,29 @@ export const moveItemOnTree = (tree: TreeData, from, to) => {
     const destination = to.parentId ? to : getDestinationPosition(tree, to);
     const { tree: treeWithoutSource, itemRemoved } = removeItemFromTree(tree, source);
     return addItemToTree(treeWithoutSource, destination, itemRemoved);
+};
+
+export const isFalseItem = id => id.startsWith('FALSEITEM_');
+
+//Extract id's for root items and expanded child items while keeping the order
+export const flattenToMinimalTree = (tree: TreeData) => {
+    const flatTreeWithNullValues = tree.items[tree.rootId].children.map((item: ChildItem) => {
+        const childrenArray =
+            tree['items'][item].hasChildren && tree['items'][item].isExpanded ? tree.items[item].children : null;
+        return [item].concat(childrenArray);
+    });
+
+    return [].concat.apply([], flatTreeWithNullValues).filter(Boolean);
+};
+
+export const stripOutFalseIdChars = (id: ItemId) => id.replace('FALSEITEM_', '');
+
+export const addFalseChildren = (tree: TreeData, flattenedTree: ItemId[]) => {
+    const arrayOfArrays = flattenedTree.map(itemId => {
+        const item = getItemById(tree, itemId);
+        return hasChildren(tree, itemId) && item.children.length === 0 && item.isExpanded
+            ? [itemId, `FALSEITEM_${itemId}`]
+            : itemId;
+    });
+    return [].concat.apply([], arrayOfArrays);
 };

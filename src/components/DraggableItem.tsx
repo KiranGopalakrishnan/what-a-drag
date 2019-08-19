@@ -1,11 +1,11 @@
 import * as React from 'react';
-import { ItemId, TreeItem } from '../types/types';
+import { TreeItem, ItemId } from '../types/types';
 
 interface DraggableitemProps {
     style: Record<string, any>;
     item: TreeItem;
-    currentlyDragging: ItemId;
-    currentlyDraggingOver: ItemId;
+    isDragging: boolean;
+    isDraggingOver: boolean;
     isChild: boolean;
     isVisible: boolean;
     renderItem: Function;
@@ -16,16 +16,19 @@ interface DraggableitemProps {
     onDragOver: Function;
     onDrop: Function;
     onDragEnd: Function;
+    setRef: Function;
+    isFalseItem: boolean;
+    parentId: ItemId;
+    parentRef: HTMLElement;
 }
 
 export const DraggableItem: React.FC<DraggableitemProps> = props => {
     const {
         style,
-        currentlyDragging,
-        currentlyDraggingOver,
+        isDragging,
+        isDraggingOver,
         item,
         isChild,
-        isVisible,
         renderItem,
         renderPlaceholder,
         onCollapse,
@@ -34,20 +37,22 @@ export const DraggableItem: React.FC<DraggableitemProps> = props => {
         onDragOver,
         onDrop,
         onDragEnd,
+        setRef,
+        isFalseItem,
+        parentId,
+        parentRef,
     } = props;
-
-    const isDragging = currentlyDragging === item.id;
-    const isDraggingOver = currentlyDraggingOver === item.id;
     return (
         <div
             key={item.id}
             className={'draggableItem'}
             draggable
+            ref={element => setRef(item.id, element)}
             onDragOver={event => onDragOver(item.id, event)}
             onDrop={event => onDrop(item.id, event)}
             onDragStart={event => {
                 event.dataTransfer.setData('text', item.id);
-                onDragStart(item.id);
+                onDragStart(item.id, event);
             }}
             onDragEnd={event => onDragEnd(event)}
             style={{
@@ -55,12 +60,14 @@ export const DraggableItem: React.FC<DraggableitemProps> = props => {
                 ...{
                     borderLeft: isChild ? 'solid 35px transparent' : '0',
                     boxSizing: 'border-box',
-                    display: isVisible ? 'block' : 'none',
+                    display: 'block',
                 },
             }}
         >
-            {renderItem({ item, onCollapse, onExpand })}
-            {isDraggingOver ? renderPlaceholder({ item, isDraggingOver, isDragging }) : null}
+            {renderItem({ item, onCollapse, onExpand, isFalseItem })}
+            {isDraggingOver
+                ? renderPlaceholder({ item, isDraggingOver, isDragging, isFalseItem, parentId, parentRef })
+                : null}
         </div>
     );
 };
