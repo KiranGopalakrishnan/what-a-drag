@@ -12,6 +12,8 @@ export interface TreeItem {
     isExpanded: boolean;
     hasChildren: boolean;
     data: TreeItemData;
+    isSelected?: boolean;
+    isFalseItem?: boolean;
     children: ChildItem[];
 }
 

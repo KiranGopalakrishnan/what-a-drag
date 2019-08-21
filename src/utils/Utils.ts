@@ -52,7 +52,9 @@ const addItemToTree = (tree: TreeData, position: TreeDestinationPosition, item: 
         hasChildren: true,
     });
 };
-
+export const getItemById = (tree, itemId: ItemId) => {
+    return tree.items[itemId] || undefined;
+};
 export const getParentId = (tree, itemId) => {
     const items = tree.items;
     const parentItem = Object.keys(items).filter((key: string) => {
@@ -107,6 +109,19 @@ export const buildCustomDestinationPosition = (parentId: ItemId, index: number) 
 export const moveItemOnTree = (tree: TreeData, from, to) => {
     const source = from.parentId ? from : getSourcePosition(tree, from);
     const destination = to.parentId ? to : getDestinationPosition(tree, to);
+
     const { tree: treeWithoutSource, itemRemoved } = removeItemFromTree(tree, source);
     return addItemToTree(treeWithoutSource, destination, itemRemoved);
+};
+
+export const isFalseItem = id => id.startsWith('FALSEITEM_');
+
+export const addFalseChildren = (tree: TreeData, flattenedTree: ItemId[]) => {
+    const arrayOfArrays = flattenedTree.map(itemId => {
+        const item = getItemById(tree, itemId);
+        return hasChildren(tree, itemId) && item.children.length === 0 && item.isExpanded
+            ? [itemId, `FALSEITEM_${itemId}`]
+            : itemId;
+    });
+    return [].concat.apply([], arrayOfArrays);
 };

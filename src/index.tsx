@@ -9,8 +9,10 @@ import {
     isChildItem,
     getSourcePosition,
     getDestinationPosition,
-    hasChildren,
+    addFalseChildren,
+    isFalseItem,
     buildCustomDestinationPosition,
+    hasChildren,
 } from './utils/Utils';
 
 type ChildItem = string;
@@ -99,11 +101,11 @@ export class DraggableList extends React.Component<Props, State> {
         const { onDragEnd } = this.props;
         const source = getSourcePosition(tree, currentlyDragging);
         //If the item is a group item move the dropped items inside the group and inoto the first position
-        const destination = hasChildren(tree, id)
-            ? buildCustomDestinationPosition(id, 0)
+        const destination = isFalseItem(id)
+            ? buildCustomDestinationPosition(id.replace('FALSEITEM_', ''), 0)
             : getDestinationPosition(tree, id);
-        moveItemOnTree(tree, source, destination);
-        const newTree = moveItemOnTree(tree, currentlyDragging, id);
+
+        const newTree = moveItemOnTree(tree, source, destination);
         onDragEnd(source, destination);
         this.setState({ currentlyDragging: null, currentlyDraggingOver: null, tree: newTree });
     };
@@ -117,8 +119,13 @@ export class DraggableList extends React.Component<Props, State> {
 
     onDragOver = (id, event) => {
         event.preventDefault();
-        const { currentlyDraggingOver } = this.state;
-        if (currentlyDraggingOver !== id) this.setState({ currentlyDraggingOver: id });
+        const { currentlyDraggingOver, tree } = this.state;
+        if (currentlyDraggingOver !== id) {
+            if (!isFalseItem(id) && hasChildren(tree, id)) {
+                this.onExpand(id);
+            }
+            this.setState({ currentlyDraggingOver: id });
+        }
     };
 
     onDragEnd = event => {
@@ -149,16 +156,30 @@ export class DraggableList extends React.Component<Props, State> {
         const { onCollapse, onExpand } = this;
 
         const minimalFlatTree = flattenToMinimalTree(tree);
-        const itemId = minimalFlatTree[index];
+        const minimalTreeWithFalseChilds = addFalseChildren(tree, minimalFlatTree);
+        const itemId = minimalTreeWithFalseChilds[index];
+        const isFalseChilditem = isFalseItem(itemId);
+        const item = isFalseChilditem
+            ? {
+                  id: itemId,
+                  isFalseItem: isFalseChilditem,
+                  hasChildren: false,
+                  isExpanded: false,
+                  data: { id: itemId },
+                  children: [],
+              }
+            : tree['items'][itemId];
+        const isVisible = isFalseChilditem ? false : isParentExpanded(tree, itemId);
+        const isChild = isFalseChilditem ? true : isChildItem(tree, itemId);
+        const isDragging = currentlyDragging === itemId;
+        const isDraggingOver = currentlyDraggingOver === itemId;
 
-        const item = tree['items'][itemId];
-        const isVisible = isParentExpanded(tree, itemId);
-        const isChild = isChildItem(tree, itemId);
         return (
             <DraggableItem
                 style={style}
-                currentlyDragging={currentlyDragging}
-                currentlyDraggingOver={currentlyDraggingOver}
+                isFalseItem={isFalseChilditem}
+                isDragging={isDragging}
+                isDraggingOver={isDraggingOver}
                 item={item}
                 isChild={isChild}
                 isVisible={isVisible}
@@ -178,13 +199,14 @@ export class DraggableList extends React.Component<Props, State> {
         const { tree, currentlyDragging, currentlyDraggingOver } = this.state;
         const { height, itemHeight, width } = this.props;
         const minimalFlatTree = flattenToMinimalTree(tree);
+        const minimalTreeWithFalseChilds = addFalseChildren(tree, minimalFlatTree);
         return (
             <List
                 tree={tree}
                 currentlyDragging={currentlyDragging}
                 currentlyDraggingOver={currentlyDraggingOver}
                 height={height}
-                itemCount={minimalFlatTree.length}
+                itemCount={minimalTreeWithFalseChilds.length}
                 itemSize={itemHeight}
                 width={width}
             >
