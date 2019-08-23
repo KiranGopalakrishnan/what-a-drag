@@ -88,7 +88,7 @@ export const getSourcePosition = (tree, itemId) => {
 
 //TODO: Refactor to support nested groups
 export const hasChildren = (tree: TreeData, itemId: ItemId) => {
-    return tree.items[itemId].hasChildren;
+    return tree.items[itemId].hasChildren||null;
 };
 
 export const getDestinationPosition = (tree, destinationId) => {

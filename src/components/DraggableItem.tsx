@@ -64,7 +64,7 @@ export const DraggableItem: React.FC<DraggableitemProps> = props => {
                 },
             }}
         >
-            {renderItem({ item, onCollapse, onExpand, isFalseItem })}
+            {renderItem({ item, onCollapse, onExpand, isFalseItem, isChild, parentId })}
             {isDraggingOver
                 ? renderPlaceholder({ item, isDraggingOver, isDragging, isFalseItem, parentId, parentRef })
                 : null}
