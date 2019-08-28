@@ -20,7 +20,7 @@ export const mutateTree = (tree: TreeData, itemId: ItemId, mutation: any): TreeD
     };
 };
 
-const removeItemFromTree = (
+export const removeItemFromTree = (
     tree: TreeData,
     position: TreeSourcePosition,
 ): { tree: TreeData; itemRemoved: TreeItem } => {
@@ -38,7 +38,7 @@ const removeItemFromTree = (
     };
 };
 
-const addItemToTree = (tree: TreeData, position: TreeDestinationPosition, item: any): TreeData => {
+export const addItemToTree = (tree: TreeData, position: TreeDestinationPosition, item: any): TreeData => {
     const destinationParent: TreeItem = tree.items[position.parentId];
     const newDestinationChildren = destinationParent.children.slice(0);
     newDestinationChildren.splice(position.index, 0, item);
@@ -107,6 +107,12 @@ export const buildCustomDestinationPosition = (parentId: ItemId, index: number) 
     };
 };
 
+export const getSelectedItems = (tree: TreeData) => {
+    return Object.values(tree.items)
+        .filter(item => item.isSelected === true)
+        .map(item => item.id);
+};
+
 export const moveItemOnTree = (tree: TreeData, from, to) => {
     const source = from.parentId ? from : getSourcePosition(tree, from);
     const destination = to.parentId ? to : getDestinationPosition(tree, to);
@@ -128,6 +134,12 @@ export const flattenToMinimalTree = (tree: TreeData) => {
 };
 
 export const stripOutFalseIdChars = (id: ItemId) => id.replace('FALSEITEM_', '');
+
+export const preserveOrderFromtree = (minimalTree: ItemId[], items: ItemId[]) => {
+    const itemsCopy = items.slice(0);
+    itemsCopy.sort();
+    return itemsCopy;
+};
 
 export const addFalseChildren = (tree: TreeData, flattenedTree: ItemId[]) => {
     const arrayOfArrays = flattenedTree.map(itemId => {
