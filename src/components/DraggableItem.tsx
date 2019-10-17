@@ -54,7 +54,6 @@ export const DraggableItem: React.FC<DraggableitemProps> = props => {
                 ...{
                     borderLeft: isChild ? 'solid 35px transparent' : '0',
                     boxSizing: 'border-box',
-                    display: !isDragging ? 'block' : 'none',
                 },
             }}
         >
