@@ -10,6 +10,7 @@ import {
     getSourcePosition,
     getDestinationPosition,
     hasChildren,
+    getParentId,
     buildCustomDestinationPosition,
 } from './utils/Utils';
 
@@ -98,10 +99,14 @@ export class DraggableList extends React.Component<Props, State> {
         const { currentlyDragging, tree } = this.state;
         const { onDragEnd } = this.props;
         const source = getSourcePosition(tree, currentlyDragging);
-        //If the item is a group item move the dropped items inside the group and inoto the first position
-        const destination = hasChildren(tree, id)
-            ? buildCustomDestinationPosition(id, 0)
-            : getDestinationPosition(tree, id);
+
+        const parentId = getParentId(tree, currentlyDragging);
+        const isComingFromGroup = !(hasChildren(tree, parentId) && parentId !== tree.rootId && parentId === id);
+        //If the item is a group item move the dropped items inside the group and into the first position
+        const destination =
+            hasChildren(tree, id) && isComingFromGroup
+                ? buildCustomDestinationPosition(id, 0)
+                : getDestinationPosition(tree, id);
         moveItemOnTree(tree, source, destination);
         const newTree = moveItemOnTree(tree, currentlyDragging, id);
         onDragEnd(source, destination);
