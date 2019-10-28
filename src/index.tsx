@@ -44,6 +44,7 @@ interface Props {
     renderItem: Function;
     tree: TreeItem[];
     onDragEnd: Function;
+    onDragStart: Function;
     renderPlaceholder: Function;
     onCollapse: Function;
     onExpand: Function;
@@ -114,10 +115,12 @@ export class DraggableList extends React.Component<Props, State> {
     };
 
     onDragStart = id => {
+        const { onDragStart } = this.props;
         //just so that the state is set a millisecond after since settimeout sends the setstate through the js event loop
         setTimeout(() => {
             this.setState({ currentlyDragging: id });
         }, 0);
+        onDragStart(id);
     };
 
     onDragOver = (id, event) => {
@@ -127,8 +130,10 @@ export class DraggableList extends React.Component<Props, State> {
     };
 
     onDragEnd = event => {
+        const { onDragEnd } = this.props;
         event.preventDefault();
         this.setState({ currentlyDragging: null, currentlyDraggingOver: null });
+        onDragEnd(null, null);
     };
 
     onCollapse = itemId => {
