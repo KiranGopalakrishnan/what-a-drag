@@ -66,6 +66,10 @@ export const isParentExpanded = (tree, itemId) => {
     return tree.items[parentId].isExpanded || false;
 };
 
+export const getRootItems = tree => {
+    return tree.items['root'];
+};
+
 export const getIndexOfItem = (tree, parentId, itemId) => {
     return tree.items[parentId].children.findIndex(childItem => childItem === itemId);
 };
@@ -109,4 +113,20 @@ export const moveItemOnTree = (tree: TreeData, from, to) => {
     const destination = to.parentId ? to : getDestinationPosition(tree, to);
     const { tree: treeWithoutSource, itemRemoved } = removeItemFromTree(tree, source);
     return addItemToTree(treeWithoutSource, destination, itemRemoved);
+};
+
+export const debounce = (func, wait, immediate = false) => {
+    var timeout;
+    return function() {
+        var context = this,
+            args = arguments;
+        var later = function() {
+            timeout = null;
+            if (!immediate) func.apply(context, args);
+        };
+        var callNow = immediate && !timeout;
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+        if (callNow) func.apply(context, args);
+    };
 };

@@ -2,7 +2,6 @@ import * as React from 'react';
 import { ItemId, TreeItem } from '../types/types';
 
 interface DraggableitemProps {
-    style: Record<string, any>;
     item: TreeItem;
     currentlyDragging: ItemId;
     currentlyDraggingOver: ItemId;
@@ -16,11 +15,11 @@ interface DraggableitemProps {
     onDragOver: Function;
     onDrop: Function;
     onDragEnd: Function;
+    itemRef: any;
 }
 
-export const DraggableItem: React.FC<DraggableitemProps> = props => {
+export const DraggableItem: React.FC<DraggableitemProps> = React.memo(props => {
     const {
-        style,
         currentlyDragging,
         currentlyDraggingOver,
         item,
@@ -33,12 +32,14 @@ export const DraggableItem: React.FC<DraggableitemProps> = props => {
         onDragOver,
         onDrop,
         onDragEnd,
+        itemRef,
     } = props;
 
     const isDragging = currentlyDragging === item.id;
     const isDraggingOver = currentlyDraggingOver === item.id;
     return (
         <div
+            ref={itemRef}
             key={item.id}
             className={'draggableItem'}
             draggable
@@ -50,15 +51,13 @@ export const DraggableItem: React.FC<DraggableitemProps> = props => {
             }}
             onDragEnd={event => onDragEnd(event)}
             style={{
-                ...style,
-                ...{
-                    borderLeft: isChild ? 'solid 35px transparent' : '0',
-                    boxSizing: 'border-box',
-                },
+                borderLeft: isChild ? 'solid 35px transparent' : '0',
+                boxSizing: 'border-box',
+                position: 'relative',
             }}
         >
             {renderItem({ item, onCollapse, onExpand, isChild })}
             {isDraggingOver ? renderPlaceholder({ item, isDraggingOver, isDragging }) : null}
         </div>
     );
-};
+});
