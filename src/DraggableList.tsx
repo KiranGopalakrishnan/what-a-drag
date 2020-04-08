@@ -1,5 +1,7 @@
 import * as React from 'react';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { FixedSizeList as List, areEqual } from 'react-window';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { DraggableItem } from './components/DraggableItem';
 import {
     moveItemOnTree,
@@ -10,77 +12,41 @@ import {
     hasChildren,
     getParentId,
     buildCustomDestinationPosition,
-    debounce,
 } from './utils/Utils';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { Loading } from './components/Loading';
-
-type ChildItem = string;
-
-type ItemId = string;
-
-interface TreeItem {
-    id: string;
-    isExpanded: boolean;
-    hasChildren: boolean;
-    data: {
-        id: string;
-        [key: string]: any;
-    };
-    children: ChildItem[];
-}
-
-interface Tree {
-    rootId: string;
-    items: { [key: string]: TreeItem };
-}
+import { Tree, ItemId, TreeData } from './types/types';
 
 interface State {
     currentlyDragging: string;
     currentlyDraggingOver: string;
     tree: Tree;
-    minimalTree: ItemId[];
 }
 
 interface Props {
     renderItem: Function;
-    tree?: Tree;
+    tree?: TreeData;
     onDragEnd: Function;
     onDragStart: Function;
     renderPlaceholder: Function;
-    renderLoading: Function;
     onCollapse: Function;
     onExpand: Function;
+    width: number | string;
+    height: number;
     itemHeight: number;
-    loadMoreItems: Function;
+    onItemsRendered: Function;
     listRef: any;
+    minimalFlatTree?: ItemId[];
+    renderLoading: Function;
 }
-
-//Extract id's for root items and expanded child items while keeping the order
-const flattenToMinimalTree = (tree: Tree, filter: Function = () => true) => {
-    const flatTreeWithNullValues = tree.items[tree.rootId].children.map((item: ChildItem) => {
-        const childrenArray =
-            filter(tree['items'][item]) && tree['items'][item].hasChildren && tree['items'][item].isExpanded
-                ? tree.items[item].children
-                : null;
-        return [item].concat(childrenArray);
-    });
-
-    return [].concat.apply([], flatTreeWithNullValues).filter(Boolean);
-};
 
 class DraggableList extends React.Component<Props, State> {
     state: State;
-    lastItem: any;
     constructor(props) {
         super(props);
         this.state = {
             currentlyDragging: null,
             currentlyDraggingOver: null,
             tree: props.tree,
-            minimalTree: flattenToMinimalTree(props.tree),
         };
-        this.lastItem = React.createRef();
     }
 
     public static defaultProps = {
@@ -89,7 +55,7 @@ class DraggableList extends React.Component<Props, State> {
         height: 400,
         width: '100%',
         itemHeight: 32,
-        renderLoading: () => <Loading />,
+        renderLoading: () => <div>Loading...</div>,
     };
 
     static getDerivedStateFromProps(props: Props, state: State) {
@@ -99,32 +65,8 @@ class DraggableList extends React.Component<Props, State> {
             tree,
             currentlyDragging,
             currentlyDraggingOver,
-            minimalTree: flattenToMinimalTree(tree),
         };
     }
-
-    componentDidMount() {
-        window.addEventListener('scroll', this.onWindowScroll, true);
-    }
-
-    componentWillUnmount() {
-        window.removeEventListener('scroll', this.onWindowScroll, true);
-    }
-
-    onWindowScroll = debounce(() => {
-        const { minimalTree } = this.state;
-        const { loadMoreItems } = this.props;
-        var rect = this.lastItem.getBoundingClientRect();
-        const isLastItemInView =
-            rect.top >= 0 &&
-            rect.left >= 0 &&
-            rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
-            rect.right <= (window.innerWidth || document.documentElement.clientWidth);
-        if (isLastItemInView) {
-            const currentLastIndex = minimalTree.length - 1;
-            loadMoreItems(currentLastIndex, currentLastIndex + 10);
-        }
-    }, 200);
 
     onDrop = (id, event) => {
         event.preventDefault();
@@ -185,15 +127,24 @@ class DraggableList extends React.Component<Props, State> {
         return copyOfTree;
     };
 
-    row = (itemId: string) => {
+    row = props => {
+        const { index, style } = props;
         const { tree, currentlyDragging, currentlyDraggingOver } = this.state;
-        const { renderItem, renderPlaceholder } = this.props;
+        const { renderItem, renderPlaceholder, minimalFlatTree, renderLoading } = this.props;
         const { onCollapse, onExpand } = this;
+        console.error({ index, min: minimalFlatTree.length });
+        if (index > minimalFlatTree.length) {
+            return renderLoading();
+        }
+
+        const itemId = minimalFlatTree[index];
+
         const item = tree['items'][itemId];
         const isVisible = isParentExpanded(tree, itemId);
         const isChild = isChildItem(tree, itemId);
         return (
             <DraggableItem
+                style={style}
                 currentlyDragging={currentlyDragging}
                 currentlyDraggingOver={currentlyDraggingOver}
                 item={item}
@@ -207,23 +158,27 @@ class DraggableList extends React.Component<Props, State> {
                 onDragOver={this.onDragOver}
                 onDrop={this.onDrop}
                 onDragEnd={this.onDragEnd}
-                itemRef={el => (this.lastItem = el)}
-                key={item.id}
             />
         );
     };
 
     render() {
-        const { minimalTree } = this.state;
-        const { renderLoading } = this.props;
+        const { tree, currentlyDragging, currentlyDraggingOver } = this.state;
+        const { height, itemHeight, width, onItemsRendered, minimalFlatTree } = this.props;
         return (
-            <>
-                {minimalTree.map(item => this.row(item))}
-                {Array(3)
-                    .fill('LOADING')
-                    .map(() => renderLoading())}
-            </>
+            <List
+                tree={tree}
+                currentlyDragging={currentlyDragging}
+                currentlyDraggingOver={currentlyDraggingOver}
+                height={height}
+                itemCount={minimalFlatTree.length}
+                itemSize={itemHeight}
+                width={width}
+                onItemsRendered={onItemsRendered}
+            >
+                {this.row}
+            </List>
         );
     }
 }
-export { moveItemOnTree, DraggableList, flattenToMinimalTree };
+export { moveItemOnTree, DraggableList };

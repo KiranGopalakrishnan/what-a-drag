@@ -1,3 +1,3 @@
-import { DraggableList, moveItemOnTree, flattenToMinimalTree } from './DraggableList';
+import { DraggableList, moveItemOnTree } from './DraggableList';
 import { InfiniteList } from './InfiniteList';
-export { DraggableList, InfiniteList, moveItemOnTree, flattenToMinimalTree };
+export { moveItemOnTree, DraggableList, InfiniteList };

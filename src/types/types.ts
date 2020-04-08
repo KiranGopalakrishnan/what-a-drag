@@ -29,3 +29,8 @@ export interface TreeDestinationPosition {
     parentId: ItemId;
     index?: number;
 }
+
+export interface Tree {
+    rootId: string;
+    items: { [key: string]: TreeItem };
+}

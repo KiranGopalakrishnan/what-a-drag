@@ -1,6 +1,6 @@
 {
     "name": "what-a-drag",
-    "version": "3.1.0",
+    "version": "3.3.0",
     "description": "A Drag and drop tree library designed with customization and usability in mind",
     "main": "./dist/index.js",
     "author": "Kiran Gopalakrishnan",
@@ -11,6 +11,7 @@
     },
     "bundledDependencies": [
         "react-window",
-        "memoizee"
+        "memoizee",
+        "react-window-infinite-loader"
     ]
 }
