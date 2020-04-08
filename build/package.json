@@ -11,6 +11,7 @@
     },
     "bundledDependencies": [
         "react-window",
-        "memoizee"
+        "memoizee",
+        "react-window-infinite-loader"
     ]
 }

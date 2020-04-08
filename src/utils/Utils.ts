@@ -1,4 +1,12 @@
-import { TreeData, ItemId, TreeItem, TreeSourcePosition, TreeDestinationPosition } from '../types/types';
+import {
+    TreeData,
+    ItemId,
+    TreeItem,
+    TreeSourcePosition,
+    TreeDestinationPosition,
+    Tree,
+    ChildItem,
+} from '../types/types';
 
 /*
   Changes the tree data structure with minimal reference changes.
@@ -106,6 +114,17 @@ export const buildCustomDestinationPosition = (parentId: ItemId, index: number) 
         parentId,
         index,
     };
+};
+
+//Extract id's for root items and expanded child items while keeping the order
+export const flattenToMinimalTree = (tree: Tree) => {
+    const flatTreeWithNullValues = tree.items[tree.rootId].children.map((item: ChildItem) => {
+        const childrenArray =
+            tree['items'][item].hasChildren && tree['items'][item].isExpanded ? tree.items[item].children : null;
+        return [item].concat(childrenArray);
+    });
+
+    return [].concat.apply([], flatTreeWithNullValues).filter(Boolean);
 };
 
 export const moveItemOnTree = (tree: TreeData, from, to) => {
