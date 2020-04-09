@@ -15,7 +15,8 @@ interface DraggableitemProps {
     onDragOver: Function;
     onDrop: Function;
     onDragEnd: Function;
-    itemRef: any;
+    itemRef?: any;
+    style: any;
 }
 
 export const DraggableItem: React.FC<DraggableitemProps> = React.memo(props => {
