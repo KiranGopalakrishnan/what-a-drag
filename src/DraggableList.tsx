@@ -36,6 +36,8 @@ interface Props {
     listRef: any;
     minimalFlatTree?: ItemId[];
     renderLoading: Function;
+    itemCount: number;
+    totalCount: number;
 }
 
 class DraggableList extends React.Component<Props, State> {
@@ -130,17 +132,17 @@ class DraggableList extends React.Component<Props, State> {
     row = props => {
         const { index, style } = props;
         const { tree, currentlyDragging, currentlyDraggingOver } = this.state;
-        const { renderItem, renderPlaceholder, minimalFlatTree, renderLoading } = this.props;
+        const { renderItem, renderPlaceholder, minimalFlatTree, renderLoading, totalCount } = this.props;
         const { onCollapse, onExpand } = this;
-        console.error({ index, min: minimalFlatTree.length });
-        if (index > minimalFlatTree.length) {
-            return renderLoading();
+        if (index > totalCount - 1) {
+            return null;
+        } else if (index > minimalFlatTree.length - 1) {
+            return <div style={style}>{renderLoading()}</div>;
         }
 
         const itemId = minimalFlatTree[index];
-
-        const item = tree['items'][itemId];
         const isVisible = isParentExpanded(tree, itemId);
+        const item = tree['items'][itemId];
         const isChild = isChildItem(tree, itemId);
         return (
             <DraggableItem
@@ -164,14 +166,15 @@ class DraggableList extends React.Component<Props, State> {
 
     render() {
         const { tree, currentlyDragging, currentlyDraggingOver } = this.state;
-        const { height, itemHeight, width, onItemsRendered, minimalFlatTree } = this.props;
+        const { height, itemHeight, width, onItemsRendered, listRef, itemCount } = this.props;
         return (
             <List
+                ref={listRef}
                 tree={tree}
                 currentlyDragging={currentlyDragging}
                 currentlyDraggingOver={currentlyDraggingOver}
                 height={height}
-                itemCount={minimalFlatTree.length}
+                itemCount={itemCount}
                 itemSize={itemHeight}
                 width={width}
                 onItemsRendered={onItemsRendered}

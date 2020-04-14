@@ -15,7 +15,7 @@ interface DraggableitemProps {
     onDragOver: Function;
     onDrop: Function;
     onDragEnd: Function;
-    itemRef: any;
+    style: any;
 }
 
 export const DraggableItem: React.FC<DraggableitemProps> = React.memo(props => {
@@ -32,14 +32,13 @@ export const DraggableItem: React.FC<DraggableitemProps> = React.memo(props => {
         onDragOver,
         onDrop,
         onDragEnd,
-        itemRef,
+        style,
     } = props;
 
     const isDragging = currentlyDragging === item.id;
     const isDraggingOver = currentlyDraggingOver === item.id;
     return (
         <div
-            ref={itemRef}
             key={item.id}
             className={'draggableItem'}
             draggable
@@ -51,9 +50,11 @@ export const DraggableItem: React.FC<DraggableitemProps> = React.memo(props => {
             }}
             onDragEnd={event => onDragEnd(event)}
             style={{
-                borderLeft: isChild ? 'solid 35px transparent' : '0',
-                boxSizing: 'border-box',
-                position: 'relative',
+                ...style,
+                ...{
+                    borderLeft: isChild ? 'solid 35px transparent' : '0',
+                    boxSizing: 'border-box',
+                },
             }}
         >
             {renderItem({ item, onCollapse, onExpand, isChild })}

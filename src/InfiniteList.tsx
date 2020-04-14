@@ -11,13 +11,20 @@ interface Props {
     batchSize: number;
     itemCount: number;
     tree: TreeData;
+    listTotal: number;
 }
 
-const InfiniteList: React.FC<Props> = ({ children, loadMoreItems, itemCount, tree }: Props) => {
+const InfiniteList: React.FC<Props> = ({ children, loadMoreItems, itemCount, listTotal, tree, batchSize }: Props) => {
     const minimalFlatTree = flattenToMinimalTree(tree);
+
     const isItemLoaded = index => minimalFlatTree.length > index;
     return (
-        <InfiniteLoader isItemLoaded={isItemLoaded} itemCount={itemCount} loadMoreItems={loadMoreItems} threshold={10}>
+        <InfiniteLoader
+            isItemLoaded={isItemLoaded}
+            itemCount={itemCount}
+            minimumBatchSize={batchSize}
+            loadMoreItems={loadMoreItems}
+        >
             {({ onItemsRendered, ref }) =>
                 React.Children.map(children, child =>
                     React.cloneElement(child, {
@@ -25,6 +32,8 @@ const InfiniteList: React.FC<Props> = ({ children, loadMoreItems, itemCount, tre
                         listRef: ref,
                         minimalFlatTree,
                         tree,
+                        itemCount: listTotal,
+                        totalCount: itemCount,
                     }),
                 )
             }
