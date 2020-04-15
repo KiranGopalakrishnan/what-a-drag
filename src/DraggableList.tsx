@@ -132,11 +132,9 @@ class DraggableList extends React.Component<Props, State> {
     row = props => {
         const { index, style } = props;
         const { tree, currentlyDragging, currentlyDraggingOver } = this.state;
-        const { renderItem, renderPlaceholder, minimalFlatTree, renderLoading, totalCount } = this.props;
+        const { renderItem, renderPlaceholder, minimalFlatTree, renderLoading } = this.props;
         const { onCollapse, onExpand } = this;
-        if (index > totalCount - 1) {
-            return null;
-        } else if (index > minimalFlatTree.length - 1) {
+        if (index >= minimalFlatTree.length) {
             return <div style={style}>{renderLoading()}</div>;
         }
 
@@ -166,7 +164,7 @@ class DraggableList extends React.Component<Props, State> {
 
     render() {
         const { tree, currentlyDragging, currentlyDraggingOver } = this.state;
-        const { height, itemHeight, width, onItemsRendered, listRef, itemCount } = this.props;
+        const { height, itemHeight, width, onItemsRendered, listRef, minimalFlatTree } = this.props;
         return (
             <List
                 ref={listRef}
@@ -174,7 +172,7 @@ class DraggableList extends React.Component<Props, State> {
                 currentlyDragging={currentlyDragging}
                 currentlyDraggingOver={currentlyDraggingOver}
                 height={height}
-                itemCount={itemCount}
+                itemCount={minimalFlatTree.length + 3}
                 itemSize={itemHeight}
                 width={width}
                 onItemsRendered={onItemsRendered}
