@@ -132,13 +132,15 @@ class DraggableList extends React.Component<Props, State> {
     row = props => {
         const { index, style } = props;
         const { tree, currentlyDragging, currentlyDraggingOver } = this.state;
-        const { renderItem, renderPlaceholder, minimalFlatTree, renderLoading } = this.props;
+        const { renderItem, renderPlaceholder, minimalFlatTree, totalCount, itemCount, renderLoading } = this.props;
         const { onCollapse, onExpand } = this;
-        if (index >= minimalFlatTree.length) {
+        if (index > minimalFlatTree.length - 1) {
+            console.error({ index, minlen: minimalFlatTree.length, totalCount, itemCount });
             return <div style={style}>{renderLoading()}</div>;
         }
 
         const itemId = minimalFlatTree[index];
+        if (!itemId) return null;
         const isVisible = isParentExpanded(tree, itemId);
         const item = tree['items'][itemId];
         const isChild = isChildItem(tree, itemId);
@@ -164,7 +166,9 @@ class DraggableList extends React.Component<Props, State> {
 
     render() {
         const { tree, currentlyDragging, currentlyDraggingOver } = this.state;
-        const { height, itemHeight, width, onItemsRendered, listRef, minimalFlatTree } = this.props;
+        const { height, itemHeight, width, onItemsRendered, listRef, minimalFlatTree, itemCount } = this.props;
+        const currentTreeLength = minimalFlatTree.length;
+        const listLength = currentTreeLength <= itemCount - 1 ? currentTreeLength + 3 : currentTreeLength;
         return (
             <List
                 ref={listRef}
@@ -172,7 +176,7 @@ class DraggableList extends React.Component<Props, State> {
                 currentlyDragging={currentlyDragging}
                 currentlyDraggingOver={currentlyDraggingOver}
                 height={height}
-                itemCount={minimalFlatTree.length + 3}
+                itemCount={listLength}
                 itemSize={itemHeight}
                 width={width}
                 onItemsRendered={onItemsRendered}
