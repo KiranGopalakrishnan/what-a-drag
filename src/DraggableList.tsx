@@ -132,10 +132,9 @@ class DraggableList extends React.Component<Props, State> {
     row = props => {
         const { index, style } = props;
         const { tree, currentlyDragging, currentlyDraggingOver } = this.state;
-        const { renderItem, renderPlaceholder, minimalFlatTree, totalCount, itemCount, renderLoading } = this.props;
+        const { renderItem, renderPlaceholder, minimalFlatTree, renderLoading } = this.props;
         const { onCollapse, onExpand } = this;
         if (index > minimalFlatTree.length - 1) {
-            console.error({ index, minlen: minimalFlatTree.length, totalCount, itemCount });
             return <div style={style}>{renderLoading()}</div>;
         }
 
