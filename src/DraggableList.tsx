@@ -167,7 +167,7 @@ class DraggableList extends React.Component<Props, State> {
         const { tree, currentlyDragging, currentlyDraggingOver } = this.state;
         const { height, itemHeight, width, onItemsRendered, listRef, minimalFlatTree, itemCount } = this.props;
         const currentTreeLength = minimalFlatTree.length;
-        const listLength = currentTreeLength <= itemCount - 1 ? currentTreeLength + 3 : currentTreeLength;
+        const listLength = currentTreeLength < itemCount - 1 ? currentTreeLength + 3 : currentTreeLength;
         return (
             <List
                 ref={listRef}
