@@ -134,6 +134,7 @@ class DraggableList extends React.Component<Props, State> {
         const { tree, currentlyDragging, currentlyDraggingOver } = this.state;
         const { renderItem, renderPlaceholder, minimalFlatTree, renderLoading } = this.props;
         const { onCollapse, onExpand } = this;
+
         if (index > minimalFlatTree.length - 1) {
             return <div style={style}>{renderLoading()}</div>;
         }
@@ -142,6 +143,10 @@ class DraggableList extends React.Component<Props, State> {
         if (!itemId) return null;
         const isVisible = isParentExpanded(tree, itemId);
         const item = tree['items'][itemId];
+        if (!item) {
+            return <div style={style}>{renderLoading()}</div>;
+        }
+
         const isChild = isChildItem(tree, itemId);
         return (
             <DraggableItem
