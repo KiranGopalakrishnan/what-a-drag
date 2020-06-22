@@ -134,6 +134,12 @@ export const moveItemOnTree = (tree: TreeData, from, to) => {
     return addItemToTree(treeWithoutSource, destination, itemRemoved);
 };
 
+export const findAllGroupChildren = (tree: TreeData) => {
+    return tree.items['root'].children
+        .filter(item => tree.items[item].hasChildren)
+        .reduce((acc, current) => (acc += tree.items[current].children.length), 0);
+};
+
 export const debounce = (func, wait, immediate = false) => {
     var timeout;
     return function() {

@@ -2,7 +2,7 @@ import * as React from 'react';
 import { TreeData } from './types/types';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import InfiniteLoader from 'react-window-infinite-loader';
-import { flattenToMinimalTree } from './utils/Utils';
+import { flattenToMinimalTree, findAllGroupChildren } from './utils/Utils';
 
 interface Props {
     children: any;
@@ -27,11 +27,24 @@ const InfiniteList: React.FC<Props> = ({
     const minimalFlatTree = flattenToMinimalTree(tree);
 
     const isItemLoaded = index => minimalFlatTree.length > index;
+
+    const numberOfChildItems = findAllGroupChildren(tree);
+
+    const [newBatchSize, setBatchSize] = React.useState(batchSize);
+
+    React.useEffect(() => {
+        if (minimalFlatTree.length > batchSize) {
+            setBatchSize(minimalFlatTree.length * 2);
+        } else {
+            setBatchSize(numberOfChildItems + batchSize);
+        }
+    }, [minimalFlatTree.length, batchSize]);
+
     return (
         <InfiniteLoader
             isItemLoaded={isItemLoaded}
             itemCount={itemCount}
-            minimumBatchSize={batchSize}
+            minimumBatchSize={newBatchSize}
             loadMoreItems={loadMoreItems}
             threshold={threshold}
         >
