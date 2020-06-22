@@ -33,8 +33,8 @@ const InfiniteList: React.FC<Props> = ({
     const [newBatchSize, setBatchSize] = React.useState(batchSize);
 
     React.useEffect(() => {
-        if (minimalFlatTree.length > batchSize) {
-            setBatchSize(minimalFlatTree.length * 2);
+        if (minimalFlatTree.length > newBatchSize) {
+            setBatchSize(minimalFlatTree.length + batchSize);
         } else {
             setBatchSize(numberOfChildItems + batchSize);
         }
