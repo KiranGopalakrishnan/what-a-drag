@@ -16,6 +16,7 @@ interface DraggableitemProps {
     onDrop: Function;
     onDragEnd: Function;
     style: any;
+    enabled: boolean;
 }
 
 export const DraggableItem: React.FC<DraggableitemProps> = React.memo(props => {
@@ -33,6 +34,7 @@ export const DraggableItem: React.FC<DraggableitemProps> = React.memo(props => {
         onDrop,
         onDragEnd,
         style,
+        enabled,
     } = props;
 
     const isDragging = currentlyDragging === item.id;
@@ -45,8 +47,12 @@ export const DraggableItem: React.FC<DraggableitemProps> = React.memo(props => {
             onDragOver={event => onDragOver(item.id, event)}
             onDrop={event => onDrop(item.id, event)}
             onDragStart={event => {
-                event.dataTransfer.setData('text', item.id);
-                onDragStart(item.id);
+                if (enabled) {
+                    event.dataTransfer.setData('text', item.id);
+                    onDragStart(item.id);
+                } else {
+                    event.preventDefault();
+                }
             }}
             onDragEnd={event => onDragEnd(event)}
             style={{

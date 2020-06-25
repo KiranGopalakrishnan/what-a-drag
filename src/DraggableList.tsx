@@ -38,6 +38,7 @@ interface Props {
     renderLoading: Function;
     itemCount: number;
     totalCount: number;
+    enabled: boolean;
 }
 
 class DraggableList extends React.Component<Props, State> {
@@ -58,6 +59,7 @@ class DraggableList extends React.Component<Props, State> {
         width: '100%',
         itemHeight: 32,
         renderLoading: () => <div>Loading...</div>,
+        enabled: true,
     };
 
     static getDerivedStateFromProps(props: Props, state: State) {
@@ -132,7 +134,7 @@ class DraggableList extends React.Component<Props, State> {
     row = props => {
         const { index, style } = props;
         const { tree, currentlyDragging, currentlyDraggingOver } = this.state;
-        const { renderItem, renderPlaceholder, minimalFlatTree, renderLoading } = this.props;
+        const { renderItem, renderPlaceholder, minimalFlatTree, renderLoading, enabled } = this.props;
         const { onCollapse, onExpand } = this;
 
         if (index > minimalFlatTree.length - 1) {
@@ -150,6 +152,7 @@ class DraggableList extends React.Component<Props, State> {
         const isChild = isChildItem(tree, itemId);
         return (
             <DraggableItem
+                enabled={enabled}
                 style={style}
                 currentlyDragging={currentlyDragging}
                 currentlyDraggingOver={currentlyDraggingOver}
